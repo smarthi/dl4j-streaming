@@ -33,8 +33,8 @@ public class EmbeddedKafkaCluster {
         this.ports = resolvePorts(ports);
         this.baseProperties = baseProperties;
 
-        this.brokers = new ArrayList<KafkaServer>();
-        this.logDirs = new ArrayList<File>();
+        this.brokers = new ArrayList<>();
+        this.logDirs = new ArrayList<>();
 
         this.brokerList = constructBrokerList(this.ports);
     }
