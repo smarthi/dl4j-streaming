@@ -2,13 +2,11 @@ package org.deeplearning4j;
 
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
+import scala.Some;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class EmbeddedKafkaCluster {
     private final List<Integer> ports;
@@ -88,7 +86,7 @@ public class EmbeddedKafkaCluster {
 
 
     private KafkaServer startBroker(Properties props) {
-        KafkaServer server = new KafkaServer(new KafkaConfig(props), new SystemTime());
+        KafkaServer server = new KafkaServer(new KafkaConfig(props), new SystemTime(),new Some<String>(""));
         server.startup();
         return server;
     }

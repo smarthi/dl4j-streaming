@@ -16,11 +16,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <camel.version>2.17.1</camel.version>
-        <canova.version>0.0.0.16-SNAPSHOT</canova.version>
+        <canova.version>0.0.0.17-SNAPSHOT</canova.version>
         <zookeeper.version>3.4.6</zookeeper.version>
         <scala.binary.version>2.11</scala.binary.version>
-        <kafka.version>0.8.2.2</kafka.version>
-        <nd4j.version>0.4-rc3.10-SNAPSHOT</nd4j.version>
+        <kafka.version>0.10.0.0</kafka.version>
+        <nd4j.version>0.4-rc3.11-SNAPSHOT</nd4j.version>
         <spark.version>1.6.0</spark.version>
     </properties>
 

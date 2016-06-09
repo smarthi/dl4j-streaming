@@ -6,8 +6,8 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -53,6 +53,7 @@
     <orderEntry type="library" name="Maven: org.json4s:json4s-ast_2.11:3.2.10" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scalap:2.11.0" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-compiler:2.11.0" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-xml_2.11:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-server:1.9" level="project" />
     <orderEntry type="library" name="Maven: asm:asm:3.1" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-core:1.9" level="project" />
@@ -188,7 +189,7 @@
     <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.2.11" level="project" />
     <orderEntry type="library" name="Maven: org.apache.camel:camel-csv:2.17.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-csv:1.1" level="project" />
-    <orderEntry type="library" name="Maven: org.deeplearning4j:dl4j-spark_2.11:0.4-rc3.10-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:dl4j-spark_2.11:0.4-rc3.11-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-mllib_2.11:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-graphx_2.11:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.github.fommil.netlib:core:1.1.2" level="project" />
@@ -202,8 +203,8 @@
     <orderEntry type="library" name="Maven: org.jpmml:pmml-agent:1.1.15" level="project" />
     <orderEntry type="library" name="Maven: org.jpmml:pmml-schema:1.1.15" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.11.6" level="project" />
-    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-scaleout-api:0.4-rc3.10-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-core:0.4-rc3.10-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-scaleout-api:0.4-rc3.11-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-core:0.4-rc3.11-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.0.28.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-common:4.0.28.Final" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.1.2" level="project" />
@@ -211,14 +212,14 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.12" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20131018" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:canova-nd4j-image:0.0.0.16-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-buffer:0.4-rc3.10-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-common:0.4-rc3.10-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:canova-nd4j-image:0.0.0.17-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-buffer:0.4-rc3.11-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-common:0.4-rc3.11-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.reflections:reflections:0.9.10" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.19.0-GA" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:annotations:2.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:canova-nd4j-common:0.0.0.16-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:canova-data-image:0.0.0.16-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:canova-nd4j-common:0.0.0.17-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:canova-data-image:0.0.0.17-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.github.jai-imageio:jai-imageio-core:1.3.0" level="project" />
     <orderEntry type="library" name="Maven: com.twelvemonkeys.imageio:imageio-jpeg:3.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.twelvemonkeys.imageio:imageio-core:3.1.1" level="project" />
@@ -239,26 +240,25 @@
     <orderEntry type="library" name="Maven: org.apache.spark:spark-streaming_2.11:1.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.spark-project.spark:unused:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-streaming-kafka_2.11:1.6.0" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:canova-spark_2.11:0.0.0.16-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:canova-api:0.0.0.16-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:0.4-rc3.10-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:linux-x86_64:0.4-rc3.10-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-native-api:0.4-rc3.10-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:canova-spark_2.11:0.0.0.17-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:canova-api:0.0.0.17-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:0.4-rc3.11-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:linux-x86_64:0.4-rc3.11-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-native-api:0.4-rc3.11-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:javacpp:1.2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-api:0.4-rc3.10-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:nd4j-context:0.4-rc3.10-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.kafka:kafka_2.11:0.8.2.2" level="project" />
-    <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-xml_2.11:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-api:0.4-rc3.11-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-context:0.4-rc3.11-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.kafka:kafka_2.11:0.10.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.101tec:zkclient:0.8" level="project" />
     <orderEntry type="library" name="Maven: com.yammer.metrics:metrics-core:2.2.0" level="project" />
-    <orderEntry type="library" name="Maven: net.sf.jopt-simple:jopt-simple:3.2" level="project" />
-    <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.2" level="project" />
-    <orderEntry type="library" name="Maven: com.101tec:zkclient:0.3" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.kafka:kafka-clients:0.8.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.kafka:kafka-clients:0.10.0.0" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.jopt-simple:jopt-simple:4.9" level="project" />
     <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.4.6" level="project" />
     <orderEntry type="library" name="Maven: jline:jline:0.9.94" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty:3.7.0.Final" level="project" />
     <orderEntry type="library" name="Maven: org.apache.camel:camel-kafka:2.17.1" level="project" />
-    <orderEntry type="library" name="Maven: org.nd4j:canova-camel:0.0.0.16-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:canova-camel:0.0.0.17-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.16.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.camel:apt:2.17.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.camel:spi-annotations:2.17.1" level="project" />

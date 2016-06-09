@@ -41,7 +41,7 @@ public final class JavaQueueStream {
     }
 
     public static void main(String[] args) throws Exception {
-        SparkConf sparkConf = new SparkConf().setAppName("JavaQueueStream");
+        SparkConf sparkConf = new SparkConf().setMaster("local[*]");
 
         // Create the context
         JavaStreamingContext ssc = new JavaStreamingContext(sparkConf, new Duration(1000));
