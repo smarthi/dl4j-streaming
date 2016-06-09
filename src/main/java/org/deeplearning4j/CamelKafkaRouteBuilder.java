@@ -39,19 +39,13 @@ public class CamelKafkaRouteBuilder extends RouteBuilder {
      */
     @Override
     public void configure() {
-        RouteDefinition def = from(inputUri);
-        if(dataTypeUnMarshal != null)
-            def = def.unmarshal(dataTypeUnMarshal);
-
-
-        def = def.to(String.format("canova://%s?inputMarshaller=%s&writableConverter=%s",inputFormat,canovaMarshaller,writableConverter));
-        if(processor != null)
-            def = def.process(processor);
-
-        def = def.to(String.format("kafka:%s?topic=%s",
+        from(inputUri)
+                .unmarshal(dataTypeUnMarshal)
+                .to(String.format("canova://%s?inputMarshaller=%s&writableConverter=%s",inputFormat,canovaMarshaller,writableConverter))
+                .process(processor)
+                .to(String.format("kafka:%s?topic=%s",
                         kafkaBrokerList,
-                        topicName))
-                .errorHandler(loggingErrorHandler("org.deeplearning4j").level(LoggingLevel.INFO));
+                        topicName));
 
 
     }

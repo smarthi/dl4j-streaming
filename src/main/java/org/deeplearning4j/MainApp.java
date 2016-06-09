@@ -60,12 +60,12 @@ public class MainApp {
 
         //"file:src/test/resources/?fileName=iris.dat&noop=true"
         int port = 9092;
-        final String topicName = "test2";
+        final String topicName = "test3";
         CamelContext camelContext = new DefaultCamelContext();
         camelContext.addRoutes(new CamelKafkaRouteBuilder.Builder().
                 camelContext(camelContext)
                 .inputFormat("org.canova.api.formats.input.impl.ListStringInputFormat").
-                        topicName("test").camelContext(camelContext)
+                        topicName(topicName).camelContext(camelContext)
                 .dataTypeUnMarshal("csv")
                 .inputUri("file:src/test/resources/?fileName=iris.dat&noop=true").
                         kafkaBrokerList("localhost:9092").processor( new Processor() {
@@ -98,6 +98,7 @@ public class MainApp {
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList(topicName));
+        consumer.commitAsync();
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(1000);
             for (ConsumerRecord<String, String> record : records) {
