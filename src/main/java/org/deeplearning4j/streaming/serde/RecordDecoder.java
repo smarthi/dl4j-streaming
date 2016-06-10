@@ -1,4 +1,4 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.serde;
 
 import kafka.serializer.Decoder;
 import org.nd4j.linalg.util.SerializationUtils;

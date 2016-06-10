@@ -19,7 +19,7 @@
         <canova.version>0.0.0.17-SNAPSHOT</canova.version>
         <zookeeper.version>3.4.6</zookeeper.version>
         <scala.binary.version>2.11</scala.binary.version>
-        <kafka.version>0.10.0.0</kafka.version>
+        <kafka.version>0.8.2.1</kafka.version>
         <nd4j.version>0.4-rc3.11-SNAPSHOT</nd4j.version>
         <spark.version>1.6.0</spark.version>
     </properties>

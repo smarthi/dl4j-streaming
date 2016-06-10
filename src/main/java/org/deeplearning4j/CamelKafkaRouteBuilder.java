@@ -4,17 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.kafka.KafkaConstants;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
-import org.canova.api.writable.Writable;
-
-import java.util.Collection;
-import java.util.UUID;
+import org.deeplearning4j.streaming.serde.RecordSerializer;
 
 /**
  * A Camel Java DSL Router

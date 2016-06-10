@@ -1,4 +1,4 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.serde;
 
 import kafka.serializer.Encoder;
 import kafka.utils.VerifiableProperties;

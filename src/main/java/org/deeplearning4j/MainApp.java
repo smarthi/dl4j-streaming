@@ -1,37 +1,25 @@
 package org.deeplearning4j;
 
-import kafka.serializer.StringDecoder;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.kafka.KafkaConstants;
-import org.apache.camel.component.kafka.KafkaEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.commons.codec.binary.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 
-import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.streaming.Durations;
-import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.canova.api.writable.Writable;
-import scala.Tuple2;
+import org.deeplearning4j.streaming.serde.RecordDeSerializer;
+import org.deeplearning4j.streaming.serde.RecordSerializer;
 
 import java.util.*;
 
@@ -73,8 +61,10 @@ public class MainApp {
                     public void process(Exchange exchange) throws Exception {
                         Collection<Collection<Writable>> record = (Collection<Collection<Writable>>) exchange.getIn().getBody();
                         exchange.getIn().setHeader(KafkaConstants.KEY, UUID.randomUUID().toString());
-                        exchange.getIn().setHeader(KafkaConstants.PARTITION_KEY, 0);
-                        exchange.getIn().setBody(new String(new RecordSerializer().serialize(topicName,record)),String.class);
+                        exchange.getIn().setHeader(KafkaConstants.PARTITION_KEY, new Random().nextInt(1));
+                        byte[] bytes = new RecordSerializer().serialize(topicName,record);
+                        String base64 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+                        exchange.getIn().setBody(base64,String.class);
                     }
                 }).build());
         camelContext.start();
@@ -96,22 +86,45 @@ public class MainApp {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList(topicName));
-        consumer.commitAsync();
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(1000);
-            for (ConsumerRecord<String, String> record : records) {
-                System.out.println(record);
-                //System.out.println("topic = %s, partition = %s, offset = %d, customer = %s, country = %s\n",record.topic(), record.partition(), record.offset(), record.key(), record.value());
+        System.setProperty("hadoop.home.dir", "/home/agibsonccc/hadoop");
 
+
+        SparkConf sparkConf = new SparkConf().setAppName("JavaDirectKafkaWordCount").setMaster("local[*]");
+        JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(1));
+        Map<String, String> kafkaParams = new HashMap<>();
+        kafkaParams.put("metadata.broker.list","localhost:9092");
+
+        JavaPairInputDStream<String,String> messages = KafkaUtils.createStream(
+                jssc,
+                "localhost:2181",
+                "canova",
+                Collections.singletonMap(topicName,3));
+        messages.foreach(new Function<JavaPairRDD<String, String>, Void>() {
+            @Override
+            public Void call(JavaPairRDD<String, String> stringStringJavaPairRDD) throws Exception {
+                Map<String,String> map = stringStringJavaPairRDD.collectAsMap();
+                if(!map.isEmpty()) {
+                    Iterator<String> vals = map.values().iterator();
+                    while(vals.hasNext()) {
+                        try {
+                            byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(vals.next());
+                            Collection<Collection<Writable>> records = new RecordDeSerializer().deserialize("topic",bytes);
+                            System.out.println(records);
+                        }catch (Exception e) {
+                            System.out.println("Error serializing");
+                        }
+                    }
+
+                }
+                return null;
             }
+        });
 
-            if (!records.isEmpty())
-                break;
-        }
+        // Start the computation
+        jssc.start();
+        Thread.sleep(30000);
+        jssc.awaitTermination();
 
-        consumer.commitSync();
         camelContext.stop();
 
 

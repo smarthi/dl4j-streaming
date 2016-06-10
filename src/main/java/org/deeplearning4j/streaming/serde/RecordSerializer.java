@@ -1,11 +1,13 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.serde;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.kafka.common.serialization.Serializer;
 import org.canova.api.writable.Writable;
 import org.nd4j.linalg.util.SerializationUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -27,6 +29,15 @@ public class RecordSerializer implements Serializer<Collection<Collection<Writab
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
         SerializationUtils.writeObject((Serializable) writables,dataOutputStream);
+        try {
+            byteArrayOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            IOUtils.closeQuietly(byteArrayOutputStream);
+        }
+
         byte[] ret = byteArrayOutputStream.toByteArray();
         return ret;
     }

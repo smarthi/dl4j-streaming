@@ -1,5 +1,6 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.serde;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.canova.api.writable.Writable;
 import org.deeplearning4j.util.SerializationUtils;
@@ -10,7 +11,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Created by agibsonccc on 6/7/16.
+ * Record de serializer for canova
+ * @author Adam Gibson
  */
 public class RecordDeSerializer implements Deserializer<Collection<Collection<Writable>>> {
     @Override
@@ -21,8 +23,14 @@ public class RecordDeSerializer implements Deserializer<Collection<Collection<Wr
     @Override
     public Collection<Collection<Writable>> deserialize(String s, byte[] bytes) {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        BufferedInputStream bis2 = new BufferedInputStream(bis);
-        return SerializationUtils.readObject(bis2);
+        Collection<Collection<Writable>>  ret;
+        try {
+            ret = SerializationUtils.readObject(bis);
+        }catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+        IOUtils.closeQuietly(bis);
+        return ret;
     }
 
     @Override
