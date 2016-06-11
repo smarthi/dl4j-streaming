@@ -1,4 +1,4 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.routes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
