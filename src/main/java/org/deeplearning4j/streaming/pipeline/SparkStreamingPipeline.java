@@ -11,6 +11,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -33,22 +34,29 @@ public class SparkStreamingPipeline {
     private String kafkaBroker;
     private String zkHost;
     private CamelContext camelContext;
+    private String sparkMaster;
+    private String hadoopHome;
+    private String dataType;
+    private String sparkAppName;
+    private Duration streamingDuration =  Durations.seconds(1);
+    private int kafkaPartitions = 1;
 
     public void process() throws Exception {
         if(camelContext == null)
             camelContext = new DefaultCamelContext();
+
         camelContext.addRoutes(new CamelKafkaRouteBuilder.Builder().
                 camelContext(camelContext)
                 .inputFormat(inputFormat).
                         topicName(kafkaTopic).camelContext(camelContext)
-                .dataTypeUnMarshal("csv")
+                .dataTypeUnMarshal(dataType)
                 .inputUri(inputUri).
-                        kafkaBrokerList("localhost:9092").processor( new Processor() {
+                        kafkaBrokerList(kafkaBroker).processor( new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         Collection<Collection<Writable>> record = (Collection<Collection<Writable>>) exchange.getIn().getBody();
                         exchange.getIn().setHeader(KafkaConstants.KEY, UUID.randomUUID().toString());
-                        exchange.getIn().setHeader(KafkaConstants.PARTITION_KEY, new Random().nextInt(1));
+                        exchange.getIn().setHeader(KafkaConstants.PARTITION_KEY, new Random().nextInt(kafkaPartitions));
                         byte[] bytes = new RecordSerializer().serialize(kafkaTopic,record);
                         String base64 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
                         exchange.getIn().setBody(base64,String.class);
@@ -57,28 +65,14 @@ public class SparkStreamingPipeline {
         camelContext.start();
 
 
-        // Create context with a 2 seconds batch interval
-        // SparkConf sparkConf = new SparkConf().setAppName("JavaDirectKafkaWordCount").setMaster("local[*]");
-        //  JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(1));
-        Properties props = new Properties();
-        props.put("bootstrap.servers", kafkaBroker);
-        props.put("group.id", "canova");
-        props.put("enable.auto.commit", "true");
-        props.put("auto.commit.interval.ms", "1000");
-        props.put("session.timeout.ms", "30000");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaConstants.KAFKA_DEFAULT_DESERIALIZER);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaConstants.KAFKA_DEFAULT_DESERIALIZER);
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBroker);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
-        System.setProperty("hadoop.home.dir", "/home/agibsonccc/hadoop");
+        System.setProperty("hadoop.home.dir", hadoopHome);
 
 
-        SparkConf sparkConf = new SparkConf().setAppName("JavaDirectKafkaWordCount").setMaster("local[*]");
-        JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(1));
+        SparkConf sparkConf = new SparkConf().setAppName(sparkAppName).setMaster(sparkMaster);
+        JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, streamingDuration);
         Map<String, String> kafkaParams = new HashMap<>();
-        kafkaParams.put("metadata.broker.list","localhost:9092");
+        kafkaParams.put("metadata.broker.list",kafkaBroker);
 
         JavaPairInputDStream<String,String> messages = KafkaUtils.createStream(
                 jssc,
@@ -113,6 +107,8 @@ public class SparkStreamingPipeline {
         camelContext.stop();
 
     }
+
+
 
 
     public SparkStreamingPipeline(String kafkaTopic, String inputUri, String inputFormat, String kafkaBroker, String zkHost, CamelContext camelContext) {
