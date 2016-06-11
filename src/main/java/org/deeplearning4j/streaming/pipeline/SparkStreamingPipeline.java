@@ -12,9 +12,11 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
@@ -22,6 +24,8 @@ import org.canova.api.writable.Writable;
 import org.deeplearning4j.streaming.routes.CamelKafkaRouteBuilder;
 import org.deeplearning4j.streaming.serde.RecordDeSerializer;
 import org.deeplearning4j.streaming.serde.RecordSerializer;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import scala.Tuple2;
 
 import java.util.*;
 
@@ -90,7 +94,13 @@ public class SparkStreamingPipeline {
                 jssc,
                 zkHost,
                 "canova",
-                Collections.singletonMap(kafkaTopic, 3));
+                Collections.singletonMap(kafkaTopic, kafkaPartitions));
+        JavaDStream<INDArray> arrays = messages.flatMap(new FlatMapFunction<Tuple2<String, String>, INDArray>() {
+            @Override
+            public Iterable<INDArray> call(Tuple2<String, String> stringStringTuple2) throws Exception {
+                return null;
+            }
+        });
         if(streamProcessor == null)
             streamProcessor = new Function<JavaPairRDD<String, String>, Void>() {
                 @Override
@@ -102,7 +112,7 @@ public class SparkStreamingPipeline {
                             try {
                                 byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(vals.next());
                                 Collection<Collection<Writable>> records = new RecordDeSerializer().deserialize("topic", bytes);
-                                System.out.println(records);
+
                             } catch (Exception e) {
                                 System.out.println("Error serializing");
                             }
