@@ -1,19 +1,12 @@
 package org.deeplearning4j.streaming.pipeline.kafka;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.streaming.Duration;
-import org.apache.spark.streaming.Durations;
-import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.canova.api.writable.Writable;
 import org.deeplearning4j.streaming.conversion.dataset.RecordToDataSet;
 import org.deeplearning4j.streaming.routes.CamelKafkaRouteBuilder;
@@ -108,11 +101,25 @@ public abstract class BaseKafkaPipeline<E> {
      */
     public abstract void initComponents();
 
+
     /**
      * Create the streaming result
      * @return the stream
      */
-    public abstract E createStream();
+    public  abstract E createStream();
+
+    /**
+     * Starts the streaming consumption
+     */
+    public  void startStreamingConsumption() {
+        startStreamingConsumption(-1);
+    }
+
+    /**
+     * Starts the streaming consumption
+     * @param timeout how long to run consumption for (-1 for infinite)
+     */
+    public abstract void startStreamingConsumption(long timeout);
 
     /**
      * Run the pipeline

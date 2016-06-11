@@ -1,11 +1,15 @@
 package org.deeplearning4j.streaming.pipeline;
 
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.deeplearning4j.streaming.conversion.dataset.CSVRecordToDataSet;
 import org.deeplearning4j.streaming.embedded.EmbeddedKafkaCluster;
 import org.deeplearning4j.streaming.embedded.EmbeddedZookeeper;
 import org.deeplearning4j.streaming.embedded.TestUtils;
+import org.deeplearning4j.streaming.pipeline.spark.PrintDataSet;
 import org.deeplearning4j.streaming.pipeline.spark.SparkStreamingPipeline;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -47,9 +51,13 @@ public class PipelineTest {
                 .zkHost("localhost:" + zkPort).sparkAppName("canova").build();
         pipeline.init();
 
-        JavaDStream<DataSet> dataSetJavaDStream =  pipeline.run();
-        System.out.println(dataSetJavaDStream.count());
+        final JavaDStream<DataSet> dataSetJavaDStream =  pipeline.run();
+         //NOTE THAT YOU NEED TO DO SOMETHING WITH THE STREAM OTHERWISE IT ERRORS OUT.
+        //ALSO NOTE HERE THAT YOU NEED TO HAVE THE FUNCTION BE AN OBJECT NOT AN ANONYMOUS
+        //CLASS BECAUSE OF TASK SERIALIZATION
+        dataSetJavaDStream.foreach(new PrintDataSet());
 
+        pipeline.startStreamingConsumption(1000);
     }
 
 
