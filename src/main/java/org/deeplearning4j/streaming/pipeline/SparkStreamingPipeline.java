@@ -48,6 +48,13 @@ public class SparkStreamingPipeline {
     private SparkConf sparkConf;
     private Function<JavaPairRDD<String, String>, Void> streamProcessor;
 
+    /**
+     * Initialize the pipeline
+     * setting up camel routes,
+     * kafka,canova,and the
+     * spark streaming DAG.
+     * @throws Exception
+     */
     public void init() throws Exception {
         if (camelContext == null)
             camelContext = new DefaultCamelContext();
@@ -106,6 +113,11 @@ public class SparkStreamingPipeline {
         messages.foreach(streamProcessor);
     }
 
+
+    /**
+     * Run the pipeline
+     * @throws Exception
+     */
     public void process() throws Exception {
         // Start the computation
         camelContext.start();
