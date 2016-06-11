@@ -6,6 +6,7 @@ import org.deeplearning4j.streaming.conversion.dataset.CSVRecordToDataSet;
 import org.deeplearning4j.streaming.embedded.EmbeddedKafkaCluster;
 import org.deeplearning4j.streaming.embedded.EmbeddedZookeeper;
 import org.deeplearning4j.streaming.embedded.TestUtils;
+import org.deeplearning4j.streaming.pipeline.spark.SparkStreamingPipeline;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,6 +46,7 @@ public class PipelineTest {
                 .kafkaPartitions(1).kafkaTopic("test3").sparkMaster("local[*]").numLabels(3).recordToDataSetFunction(new CSVRecordToDataSet())
                 .zkHost("localhost:" + zkPort).sparkAppName("canova").build();
         pipeline.init();
+
         JavaDStream<DataSet> dataSetJavaDStream =  pipeline.run();
         System.out.println(dataSetJavaDStream.count());
 

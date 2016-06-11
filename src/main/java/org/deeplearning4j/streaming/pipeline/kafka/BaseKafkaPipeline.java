@@ -1,5 +1,6 @@
-package org.deeplearning4j.streaming.pipeline;
+package org.deeplearning4j.streaming.pipeline.kafka;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.camel.CamelContext;
@@ -7,55 +8,44 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.Durations;
-import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.canova.api.writable.Writable;
 import org.deeplearning4j.streaming.conversion.dataset.RecordToDataSet;
 import org.deeplearning4j.streaming.routes.CamelKafkaRouteBuilder;
-import org.deeplearning4j.streaming.serde.RecordDeSerializer;
 import org.deeplearning4j.streaming.serde.RecordSerializer;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.DataSet;
-import scala.Tuple2;
 
 import java.util.*;
 
 /**
- * Spark streaming pipeline.
+ * A base kafka pieline that handles
+ * connecting to kafka and consuming from a stream.
  *
+ * @author Adam Gibson
  */
 @Data
-@Builder
-public class SparkStreamingPipeline {
-    private String kafkaTopic;
-    private String inputUri;
-    private String inputFormat;
-    private String kafkaBroker;
-    private String zkHost;
-    private CamelContext camelContext;
-    private String sparkMaster;
-    private String hadoopHome;
-    private String dataType;
-    private String sparkAppName = "canova";
-    private Duration streamingDuration =  Durations.seconds(1);
-    private int kafkaPartitions = 1;
-    private JavaStreamingContext jssc;
-    private SparkConf sparkConf;
-    private Function<JavaPairRDD<String, String>, Void> streamProcessor;
-    private RecordToDataSet recordToDataSetFunction;
-    private int numLabels;
-    private  JavaDStream<DataSet> dataset;
+@AllArgsConstructor
+public abstract class BaseKafkaPipeline<E> {
+
+    protected String kafkaTopic;
+    protected String inputUri;
+    protected String inputFormat;
+    protected String kafkaBroker;
+    protected String zkHost;
+    protected CamelContext camelContext;
+    protected String hadoopHome;
+    protected String dataType;
+    protected String sparkAppName = "canova";
+    protected int kafkaPartitions = 1;
+    protected RecordToDataSet recordToDataSetFunction;
+    protected int numLabels;
+    protected E dataset;
+
+
 
     /**
      * Initialize the pipeline
@@ -90,36 +80,51 @@ public class SparkStreamingPipeline {
         if(hadoopHome == null)
             hadoopHome = System.getProperty("java.io.tmpdir");
         System.setProperty("hadoop.home.dir", hadoopHome);
-        sparkConf = new SparkConf().setAppName(sparkAppName).setMaster(sparkMaster);
-        jssc = new JavaStreamingContext(sparkConf, streamingDuration);
-        Map<String, String> kafkaParams = new HashMap<>();
-        kafkaParams.put("metadata.broker.list", kafkaBroker);
 
-
+        initComponents();
     }
 
+
+    /**
+     * Start the camel context
+     * used for etl
+     * @throws Exception
+     */
+    public void startCamel() throws Exception {
+        camelContext.start();
+    }
+
+    /**
+     * Stop the camel context
+     * used for etl
+     * @throws Exception
+     */
+    public void stopCamel() throws Exception {
+        camelContext.stop();
+    }
+
+    /**
+     * Initialize implementation specific components
+     */
+    public abstract void initComponents();
+
+    /**
+     * Create the streaming result
+     * @return the stream
+     */
+    public abstract E createStream();
 
     /**
      * Run the pipeline
      * @throws Exception
      */
-    public JavaDStream<DataSet> run() throws Exception {
+    public E run() throws Exception {
         // Start the computation
-        camelContext.start();
-        JavaPairInputDStream<String, String> messages = KafkaUtils.createStream(
-                jssc,
-                zkHost,
-                "canova",
-                Collections.singletonMap(kafkaTopic, kafkaPartitions));
-        JavaDStream<DataSet> dataset = messages.flatMap(new DataSetFlatmap(numLabels,recordToDataSetFunction)).cache();
-        dataset.print();
-        jssc.start();
-        jssc.awaitTermination();
-        camelContext.stop();
+        startCamel();
+        dataset = createStream();
+        stopCamel();
         return dataset;
     }
-
-
 
 
 }

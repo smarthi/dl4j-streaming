@@ -1,4 +1,4 @@
-package org.deeplearning4j.streaming.pipeline;
+package org.deeplearning4j.streaming.pipeline.spark;
 
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.canova.api.writable.Writable;
