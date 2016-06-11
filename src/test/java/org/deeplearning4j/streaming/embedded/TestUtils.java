@@ -1,4 +1,4 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.embedded;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Random;
 
-class TestUtils {
+public class TestUtils {
     private static final Random RANDOM = new Random();
 
     private TestUtils() {

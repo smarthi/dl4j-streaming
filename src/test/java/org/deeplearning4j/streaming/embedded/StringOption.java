@@ -1,4 +1,4 @@
-package org.deeplearning4j;
+package org.deeplearning4j.streaming.embedded;
 
 import scala.Option;
 

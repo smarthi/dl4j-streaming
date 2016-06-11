@@ -41,7 +41,7 @@ public class SparkStreamingPipeline {
     private String sparkMaster;
     private String hadoopHome;
     private String dataType;
-    private String sparkAppName;
+    private String sparkAppName = "canova";
     private Duration streamingDuration =  Durations.seconds(1);
     private int kafkaPartitions = 1;
     private JavaStreamingContext jssc;
@@ -78,6 +78,8 @@ public class SparkStreamingPipeline {
                 }).build());
 
 
+        if(hadoopHome == null)
+            hadoopHome = System.getProperty("java.io.tmpdir");
         System.setProperty("hadoop.home.dir", hadoopHome);
         sparkConf = new SparkConf().setAppName(sparkAppName).setMaster(sparkMaster);
         jssc = new JavaStreamingContext(sparkConf, streamingDuration);
@@ -90,7 +92,7 @@ public class SparkStreamingPipeline {
                 "canova",
                 Collections.singletonMap(kafkaTopic, 3));
         if(streamProcessor == null)
-            new Function<JavaPairRDD<String, String>, Void>() {
+            streamProcessor = new Function<JavaPairRDD<String, String>, Void>() {
                 @Override
                 public Void call(JavaPairRDD<String, String> stringStringJavaPairRDD) throws Exception {
                     Map<String, String> map = stringStringJavaPairRDD.collectAsMap();
@@ -110,6 +112,7 @@ public class SparkStreamingPipeline {
                     return null;
                 }
             };
+
         messages.foreach(streamProcessor);
     }
 
@@ -118,7 +121,7 @@ public class SparkStreamingPipeline {
      * Run the pipeline
      * @throws Exception
      */
-    public void process() throws Exception {
+    public void run() throws Exception {
         // Start the computation
         camelContext.start();
         jssc.start();
