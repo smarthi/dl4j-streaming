@@ -38,8 +38,6 @@ public class CamelKafkaRouteBuilder extends RouteBuilder {
                 .to(String.format("kafka:%s?topic=%s",
                         kafkaBrokerList,
                         topicName));
-
-
     }
 
 

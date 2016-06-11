@@ -55,6 +55,8 @@ public class SparkStreamingPipeline {
     private Function<JavaPairRDD<String, String>, Void> streamProcessor;
     private RecordToDataSet recordToDataSetFunction;
     private int numLabels;
+    private  JavaDStream<DataSet> dataset;
+
     /**
      * Initialize the pipeline
      * setting up camel routes,
@@ -62,7 +64,7 @@ public class SparkStreamingPipeline {
      * spark streaming DAG.
      * @throws Exception
      */
-    public    JavaDStream<DataSet> init() throws Exception {
+    public    void init() throws Exception {
         if (camelContext == null)
             camelContext = new DefaultCamelContext();
 
@@ -93,31 +95,7 @@ public class SparkStreamingPipeline {
         Map<String, String> kafkaParams = new HashMap<>();
         kafkaParams.put("metadata.broker.list", kafkaBroker);
 
-        JavaPairInputDStream<String, String> messages = KafkaUtils.createStream(
-                jssc,
-                zkHost,
-                "canova",
-                Collections.singletonMap(kafkaTopic, kafkaPartitions));
-        JavaDStream<DataSet> dataset = messages.flatMap(new FlatMapFunction<Tuple2<String, String>, DataSet>() {
-            @Override
-            public Iterable<DataSet> call(Tuple2<String, String> stringStringTuple2) throws Exception {
-                try {
-                    byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(stringStringTuple2._2());
-                    Collection<Collection<Writable>> records = new RecordDeSerializer().deserialize("topic", bytes);
-                    DataSet d = recordToDataSetFunction.convert(records,numLabels);
-                    return Arrays.asList(d);
 
-                } catch (Exception e) {
-                    System.out.println("Error serializing");
-                }
-
-
-
-                return null;
-            }
-        });
-
-        return dataset;
     }
 
 
@@ -125,13 +103,20 @@ public class SparkStreamingPipeline {
      * Run the pipeline
      * @throws Exception
      */
-    public void run() throws Exception {
+    public JavaDStream<DataSet> run() throws Exception {
         // Start the computation
         camelContext.start();
+        JavaPairInputDStream<String, String> messages = KafkaUtils.createStream(
+                jssc,
+                zkHost,
+                "canova",
+                Collections.singletonMap(kafkaTopic, kafkaPartitions));
+        JavaDStream<DataSet> dataset = messages.flatMap(new DataSetFlatmap(numLabels,recordToDataSetFunction)).cache();
+        dataset.print();
         jssc.start();
         jssc.awaitTermination();
         camelContext.stop();
-
+        return dataset;
     }
 
 

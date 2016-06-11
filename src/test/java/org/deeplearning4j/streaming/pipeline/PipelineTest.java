@@ -1,12 +1,15 @@
 package org.deeplearning4j.streaming.pipeline;
 
 import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.api.java.JavaDStream;
+import org.deeplearning4j.streaming.conversion.dataset.CSVRecordToDataSet;
 import org.deeplearning4j.streaming.embedded.EmbeddedKafkaCluster;
 import org.deeplearning4j.streaming.embedded.EmbeddedZookeeper;
 import org.deeplearning4j.streaming.embedded.TestUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.nd4j.linalg.dataset.DataSet;
 
 /**
  * Created by agibsonccc on 6/10/16.
@@ -39,10 +42,11 @@ public class PipelineTest {
                 .dataType("csv").kafkaBroker(kafkaCluster.getBrokerList())
                 .inputFormat("org.canova.api.formats.input.impl.ListStringInputFormat")
                 .inputUri("file:src/test/resources/?fileName=iris.dat&noop=true").streamingDuration(Durations.seconds(1))
-                .kafkaPartitions(1).kafkaTopic("test3").sparkMaster("local[*]").numLabels(3)
+                .kafkaPartitions(1).kafkaTopic("test3").sparkMaster("local[*]").numLabels(3).recordToDataSetFunction(new CSVRecordToDataSet())
                 .zkHost("localhost:" + zkPort).sparkAppName("canova").build();
         pipeline.init();
-        pipeline.run();
+        JavaDStream<DataSet> dataSetJavaDStream =  pipeline.run();
+        System.out.println(dataSetJavaDStream.count());
 
     }
 
