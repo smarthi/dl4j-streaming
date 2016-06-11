@@ -21,10 +21,12 @@ import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.canova.api.writable.Writable;
+import org.deeplearning4j.streaming.conversion.dataset.RecordToDataSet;
 import org.deeplearning4j.streaming.routes.CamelKafkaRouteBuilder;
 import org.deeplearning4j.streaming.serde.RecordDeSerializer;
 import org.deeplearning4j.streaming.serde.RecordSerializer;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
 import scala.Tuple2;
 
 import java.util.*;
@@ -51,7 +53,8 @@ public class SparkStreamingPipeline {
     private JavaStreamingContext jssc;
     private SparkConf sparkConf;
     private Function<JavaPairRDD<String, String>, Void> streamProcessor;
-
+    private RecordToDataSet recordToDataSetFunction;
+    private int numLabels;
     /**
      * Initialize the pipeline
      * setting up camel routes,
@@ -59,7 +62,7 @@ public class SparkStreamingPipeline {
      * spark streaming DAG.
      * @throws Exception
      */
-    public void init() throws Exception {
+    public    JavaDStream<DataSet> init() throws Exception {
         if (camelContext == null)
             camelContext = new DefaultCamelContext();
 
@@ -95,35 +98,26 @@ public class SparkStreamingPipeline {
                 zkHost,
                 "canova",
                 Collections.singletonMap(kafkaTopic, kafkaPartitions));
-        JavaDStream<INDArray> arrays = messages.flatMap(new FlatMapFunction<Tuple2<String, String>, INDArray>() {
+        JavaDStream<DataSet> dataset = messages.flatMap(new FlatMapFunction<Tuple2<String, String>, DataSet>() {
             @Override
-            public Iterable<INDArray> call(Tuple2<String, String> stringStringTuple2) throws Exception {
+            public Iterable<DataSet> call(Tuple2<String, String> stringStringTuple2) throws Exception {
+                try {
+                    byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(stringStringTuple2._2());
+                    Collection<Collection<Writable>> records = new RecordDeSerializer().deserialize("topic", bytes);
+                    DataSet d = recordToDataSetFunction.convert(records,numLabels);
+                    return Arrays.asList(d);
+
+                } catch (Exception e) {
+                    System.out.println("Error serializing");
+                }
+
+
+
                 return null;
             }
         });
-        if(streamProcessor == null)
-            streamProcessor = new Function<JavaPairRDD<String, String>, Void>() {
-                @Override
-                public Void call(JavaPairRDD<String, String> stringStringJavaPairRDD) throws Exception {
-                    Map<String, String> map = stringStringJavaPairRDD.collectAsMap();
-                    if (!map.isEmpty()) {
-                        Iterator<String> vals = map.values().iterator();
-                        while (vals.hasNext()) {
-                            try {
-                                byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(vals.next());
-                                Collection<Collection<Writable>> records = new RecordDeSerializer().deserialize("topic", bytes);
 
-                            } catch (Exception e) {
-                                System.out.println("Error serializing");
-                            }
-                        }
-
-                    }
-                    return null;
-                }
-            };
-
-        messages.foreach(streamProcessor);
+        return dataset;
     }
 
 

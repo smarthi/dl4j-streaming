@@ -39,7 +39,7 @@ public class PipelineTest {
                 .dataType("csv").kafkaBroker(kafkaCluster.getBrokerList())
                 .inputFormat("org.canova.api.formats.input.impl.ListStringInputFormat")
                 .inputUri("file:src/test/resources/?fileName=iris.dat&noop=true").streamingDuration(Durations.seconds(1))
-                .kafkaPartitions(1).kafkaTopic("test3").sparkMaster("local[*]")
+                .kafkaPartitions(1).kafkaTopic("test3").sparkMaster("local[*]").numLabels(3)
                 .zkHost("localhost:" + zkPort).sparkAppName("canova").build();
         pipeline.init();
         pipeline.run();
