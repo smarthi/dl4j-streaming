@@ -1,9 +1,8 @@
-package org.deeplearning4j.streaming.pipeline.spark;
+package org.deeplearning4j.streaming.pipeline.spark.inerference;
 
 import lombok.Builder;
 import lombok.Data;
 import org.apache.camel.CamelContext;
-
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -15,10 +14,12 @@ import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.deeplearning4j.streaming.conversion.dataset.RecordToDataSet;
+import org.deeplearning4j.streaming.conversion.ndarray.RecordToNDArray;
 import org.deeplearning4j.streaming.pipeline.kafka.BaseKafkaPipeline;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 
-import java.util.*;
+import java.util.Collections;
 
 /**
  * Spark streaming pipeline.
@@ -26,16 +27,34 @@ import java.util.*;
  * @author Adam Gibson
  */
 @Data
-public class SparkStreamingPipeline extends BaseKafkaPipeline<JavaDStream<DataSet>,RecordToDataSet> {
+public class SparkStreamingInferencePipeline extends BaseKafkaPipeline<JavaDStream<INDArray>,RecordToNDArray> {
     protected JavaStreamingContext jssc;
     protected SparkConf sparkConf;
     protected Function<JavaPairRDD<String, String>, Void> streamProcessor;
     protected Duration streamingDuration =  Durations.seconds(1);
     protected String sparkMaster;
-    protected Function<JavaRDD<DataSet>, Void> datasetConsumption;
+    protected Function<JavaRDD<INDArray>, Void> datasetConsumption;
 
     @Builder
-    public SparkStreamingPipeline(String kafkaTopic, String inputUri, String inputFormat, String kafkaBroker, String zkHost, CamelContext camelContext, String hadoopHome, String dataType, String sparkAppName, int kafkaPartitions, RecordToDataSet recordToDataSetFunction, int numLabels, JavaDStream<DataSet> dataset, JavaStreamingContext jssc, SparkConf sparkConf, Function<JavaPairRDD<String, String>, Void> streamProcessor, Duration streamingDuration, String sparkMaster) {
+    public SparkStreamingInferencePipeline(
+            String kafkaTopic,
+            String inputUri,
+            String inputFormat,
+            String kafkaBroker,
+            String zkHost,
+            CamelContext camelContext,
+            String hadoopHome,
+            String dataType,
+            String sparkAppName,
+            int kafkaPartitions,
+            RecordToNDArray recordToDataSetFunction,
+            int numLabels,
+            JavaDStream<INDArray> dataset,
+            JavaStreamingContext jssc,
+            SparkConf sparkConf,
+            Function<JavaPairRDD<String, String>, Void> streamProcessor,
+            Duration streamingDuration,
+            String sparkMaster) {
         super(kafkaTopic, inputUri, inputFormat, kafkaBroker, zkHost, camelContext, hadoopHome, dataType, sparkAppName, kafkaPartitions, recordToDataSetFunction, numLabels, dataset);
         this.jssc = jssc;
         this.sparkConf = sparkConf;
@@ -56,13 +75,13 @@ public class SparkStreamingPipeline extends BaseKafkaPipeline<JavaDStream<DataSe
      * @return the stream
      */
     @Override
-    public JavaDStream<DataSet> createStream() {
+    public JavaDStream<INDArray> createStream() {
         JavaPairInputDStream<String, String> messages = KafkaUtils.createStream(
                 jssc,
                 zkHost,
                 "canova",
                 Collections.singletonMap(kafkaTopic, kafkaPartitions));
-        JavaDStream<DataSet> dataset = messages.flatMap(new DataSetFlatmap(numLabels,recordToDataSetFunction)).cache();
+        JavaDStream<INDArray> dataset = messages.flatMap(new NDArrayFlatMap(recordToDataSetFunction)).cache();
         return dataset;
     }
 

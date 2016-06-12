@@ -1,8 +1,6 @@
 package org.deeplearning4j.streaming.pipeline;
 
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.VoidFunction;
+
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.deeplearning4j.streaming.conversion.dataset.CSVRecordToDataSet;
@@ -11,6 +9,7 @@ import org.deeplearning4j.streaming.embedded.EmbeddedZookeeper;
 import org.deeplearning4j.streaming.embedded.TestUtils;
 import org.deeplearning4j.streaming.pipeline.spark.PrintDataSet;
 import org.deeplearning4j.streaming.pipeline.spark.SparkStreamingPipeline;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,6 +57,7 @@ public class PipelineTest {
         dataSetJavaDStream.foreach(new PrintDataSet());
 
         pipeline.startStreamingConsumption(1000);
+
     }
 
 

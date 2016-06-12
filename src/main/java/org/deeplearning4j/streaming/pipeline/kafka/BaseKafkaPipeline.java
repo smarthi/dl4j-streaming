@@ -9,6 +9,7 @@ import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.canova.api.writable.Writable;
 import org.deeplearning4j.streaming.conversion.dataset.RecordToDataSet;
+import org.deeplearning4j.streaming.conversion.ndarray.RecordToNDArray;
 import org.deeplearning4j.streaming.routes.CamelKafkaRouteBuilder;
 import org.deeplearning4j.streaming.serde.RecordSerializer;
 
@@ -22,7 +23,7 @@ import java.util.*;
  */
 @Data
 @AllArgsConstructor
-public abstract class BaseKafkaPipeline<E> {
+public abstract class BaseKafkaPipeline<E,RECORD_CONVERTER_FUNCTION> {
 
     protected String kafkaTopic;
     protected String inputUri;
@@ -34,7 +35,7 @@ public abstract class BaseKafkaPipeline<E> {
     protected String dataType;
     protected String sparkAppName = "canova";
     protected int kafkaPartitions = 1;
-    protected RecordToDataSet recordToDataSetFunction;
+    protected RECORD_CONVERTER_FUNCTION recordToDataSetFunction;
     protected int numLabels;
     protected E dataset;
 
