@@ -4,13 +4,11 @@ import kafka.serializer.StringEncoder;
 import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaConstants;
-import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.util.Base64;
 
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.deeplearning4j.datasets.iterator.DataSetIterator;
 import org.deeplearning4j.datasets.iterator.impl.IrisDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -47,7 +45,7 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
     public final static String LOCALHOST = "localhost";
     private File dir = new File("tmpdir");
     private DataSet next;
-    private String topicName = "predict";
+    private static String topicName = "predict";
     private String key = UUID.randomUUID().toString();
 
     @BeforeClass
@@ -57,6 +55,7 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
         zookeeper.startup();
         kafkaCluster = new EmbeddedKafkaCluster(LOCALHOST + ":" + zkPort);
         kafkaCluster.startup();
+        kafkaCluster.createTopics(topicName);
     }
 
     @AfterClass
@@ -85,7 +84,6 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
                         .process(new Processor() {
                             @Override
                             public void process(Exchange exchange) throws Exception {
-                                System.out.println(kafkaUri);
                                 final INDArray arr = next.getFeatureMatrix();
                                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                                 DataOutputStream dos = new DataOutputStream(bos);
@@ -167,17 +165,8 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
         ConsumerTemplate consumerTemplate = context.createConsumerTemplate();
         ProducerTemplate producerTemplate = context.createProducerTemplate();
         producerTemplate.sendBody("direct:start","hello");
-        while(true) {
-            String exchange = consumerTemplate.receiveBody(endpoint,String.class);
-            if(exchange == null) {
-                continue;
-            }
-            else {
-                break;
-            }
-        }
-
-        assertTrue(new File(dir,"tmp.txt").exists());
+       Thread.sleep(30000);
+        consumerTemplate.receiveBody(endpoint,3000,String.class);
         String contents = FileUtils.readFileToString(new File(dir,"tmp.txt"));
         assertNotEquals("",contents);
     }

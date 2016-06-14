@@ -51,32 +51,37 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
                 consumingTopic
                 ,groupId
                 ,zooKeeperHost
-                ,zooKeeperPort, StringEncoder.class.getName(),StringEncoder.class.getName());
+                ,zooKeeperPort,
+                StringEncoder.class.getName(),
+                StringEncoder.class.getName());
         from(kafkaUri)
                 .process(new Processor() {
-            @Override
-            public void process(Exchange exchange) throws Exception {
-                String base64NDArray = (String) exchange.getIn().getBody();
-                byte[] arr  = Base64.decodeBase64(base64NDArray);
-                ByteArrayInputStream bis = new ByteArrayInputStream(arr);
-                INDArray predict = Nd4j.read(bis);
-                if(computationGraph) {
-                    ComputationGraph graph = ModelSerializer.restoreComputationGraph(modelUri);
-                    INDArray[] output = graph.output(predict);
-                    exchange.getOut().setBody(output);
-                    exchange.getIn().setBody(output);
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        byte[] o = (byte[]) exchange.getIn().getBody();
+                        byte[] arr  = Base64.decodeBase64(o);
+                        ByteArrayInputStream bis = new ByteArrayInputStream(arr);
+                        System.out.println("BEFORE READ ARRAY");
+                        INDArray predict = Nd4j.read(bis);
+                        System.out.println("NEURAL NETS");
+                        System.out.println("READ ARRAY");
+                        if(computationGraph) {
+                            ComputationGraph graph = ModelSerializer.restoreComputationGraph(modelUri);
+                            INDArray[] output = graph.output(predict);
+                            exchange.getOut().setBody(output);
+                            exchange.getIn().setBody(output);
 
-                }
-                else {
-                    MultiLayerNetwork network = ModelSerializer.restoreMultiLayerNetwork(modelUri);
-                    INDArray output = network.output(predict);
-                    exchange.getOut().setBody(output);
-                    exchange.getIn().setBody(output);
-                }
+                        }
+                        else {
+                            MultiLayerNetwork network = ModelSerializer.restoreMultiLayerNetwork(modelUri);
+                            INDArray output = network.output(predict);
+                            exchange.getOut().setBody(output);
+                            exchange.getIn().setBody(output);
+                        }
 
 
-            }
-        }).process(finalProcessor)
+                    }
+                }).process(finalProcessor)
                 .to(outputUri);
     }
 }
