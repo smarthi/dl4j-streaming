@@ -15,21 +15,69 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <camel.version>2.17.1</camel.version>
+        <camel.version>2.16.3</camel.version>
         <canova.version>0.0.0.17-SNAPSHOT</canova.version>
         <zookeeper.version>3.4.6</zookeeper.version>
         <scala.binary.version>2.11</scala.binary.version>
-        <kafka.version>0.8.2.1</kafka.version>
+        <kafka.version>0.8.2.2</kafka.version>
         <nd4j.version>0.4-rc3.11-SNAPSHOT</nd4j.version>
-        <spark.version>1.6.0</spark.version>
+        <spark.version>1.5.2</spark.version>
     </properties>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka_${scala.binary.version}</artifactId>
+                <version>${kafka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <profiles>
+        <profile>
+            <id>scala-2.11</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.11</value>
+                </property>
+            </activation>
+            <properties>
+                <scala.version>2.11.7</scala.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.scala-lang</groupId>
+                    <artifactId>scala-library</artifactId>
+                    <version>2.11.7</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>scala-2.10</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.10</value>
+                </property>
+            </activation>
+            <properties>
+                <scala.version>2.10.6</scala.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.scala-lang</groupId>
+                    <artifactId>scala-library</artifactId>
+                    <version>2.10.6</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
     <dependencies>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-spark</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-csv</artifactId>
@@ -63,8 +111,8 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_${scala.binary.version}</artifactId>
-            <version>${kafka.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
@@ -74,6 +122,13 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-kafka</artifactId>
             <version>${camel.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test</artifactId>
+            <version>${camel.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>

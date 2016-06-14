@@ -1,5 +1,6 @@
 package org.deeplearning4j.streaming.routes;
 
+import kafka.serializer.StringEncoder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +25,8 @@ public class CamelKafkaRouteBuilder extends RouteBuilder {
     private String inputFormat;
     private Processor processor;
     private String dataTypeUnMarshal;
-
-
+    private String zooKeeperHost = "localhost";
+    private int zooKeeperPort = 2181;
     /**
      * Let's configure the Camel routing rules using Java code...
      */
@@ -35,9 +36,10 @@ public class CamelKafkaRouteBuilder extends RouteBuilder {
                 .unmarshal(dataTypeUnMarshal)
                 .to(String.format("canova://%s?inputMarshaller=%s&writableConverter=%s",inputFormat,canovaMarshaller,writableConverter))
                 .process(processor)
-                .to(String.format("kafka:%s?topic=%s",
+                .to(String.format("kafka:%s?topic=%s&zookeeperHost=%szookeeperPort=%d&serializerClass=%s&keySerializerClass=%s",
                         kafkaBrokerList,
-                        topicName));
+                        topicName,
+                        zooKeeperHost,zooKeeperPort, StringEncoder.class.getName(),StringEncoder.class.getName()));
     }
 
 
@@ -58,7 +60,18 @@ public class CamelKafkaRouteBuilder extends RouteBuilder {
         private String inputFormat;
         private Processor processor;
         private String dataTypeUnMarshal;
+        private String zooKeeperHost = "localhost";
+        private int zooKeeperPort = 2181;
 
+        public Builder zooKeeperHost(String zooKeeperHost) {
+            this.zooKeeperHost = zooKeeperHost;
+            return this;
+        }
+
+        public Builder zooKeeperPort(int zooKeeperPort) {
+            this.zooKeeperPort = zooKeeperPort;
+            return this;
+        }
 
         public Builder processor(Processor processor) {
             this.processor = processor;
@@ -127,7 +140,9 @@ public class CamelKafkaRouteBuilder extends RouteBuilder {
                     inputUri,
                     inputFormat
                     ,processor,
-                    dataTypeUnMarshal);
+                    dataTypeUnMarshal,
+                    zooKeeperHost,
+                    zooKeeperPort);
             if(camelContext != null)
                 routeBuilder.setContext(camelContext);
             return routeBuilder;

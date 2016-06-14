@@ -1,14 +1,39 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.deeplearning4j.streaming.embedded;
-
-import kafka.server.KafkaConfig;
-import kafka.server.KafkaServer;
-import scala.Some;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+
+import kafka.admin.AdminUtils;
+import kafka.server.KafkaConfig;
+import kafka.server.KafkaServer;
+import org.I0Itec.zkclient.ZkClient;
+import org.deeplearning4j.streaming.embedded.TestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EmbeddedKafkaCluster {
+    private static final Logger LOG = LoggerFactory.getLogger(EmbeddedKafkaCluster.class);
+
     private final List<Integer> ports;
     private final String zkConnection;
     private final Properties baseProperties;
@@ -30,11 +55,23 @@ public class EmbeddedKafkaCluster {
         this.zkConnection = zkConnection;
         this.ports = resolvePorts(ports);
         this.baseProperties = baseProperties;
-
-        this.brokers = new ArrayList<>();
-        this.logDirs = new ArrayList<>();
+        this.brokers = new ArrayList<KafkaServer>();
+        this.logDirs = new ArrayList<File>();
 
         this.brokerList = constructBrokerList(this.ports);
+    }
+
+    public ZkClient getZkClient() {
+        for (KafkaServer server : brokers) {
+            return server.zkClient();
+        }
+        return null;
+    }
+
+    public void createTopics(String...topics) {
+        for (String topic : topics) {
+            AdminUtils.createTopic(getZkClient(), topic, 2, 1, new Properties());
+        }
     }
 
     private List<Integer> resolvePorts(List<Integer> ports) {
@@ -75,7 +112,10 @@ public class EmbeddedKafkaCluster {
             properties.setProperty("host.name", "localhost");
             properties.setProperty("port", Integer.toString(port));
             properties.setProperty("log.dir", logDir.getAbsolutePath());
+            properties.setProperty("num.partitions",  String.valueOf(1));
+            properties.setProperty("auto.create.topics.enable",  String.valueOf(Boolean.TRUE));
             properties.setProperty("log.flush.interval.messages", String.valueOf(1));
+            LOG.info("EmbeddedKafkaCluster: local directory: " + logDir.getAbsolutePath());
 
             KafkaServer broker = startBroker(properties);
 

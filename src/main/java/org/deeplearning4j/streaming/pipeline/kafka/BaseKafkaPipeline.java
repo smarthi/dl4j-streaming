@@ -7,13 +7,17 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.commons.net.util.Base64;
 import org.canova.api.writable.Writable;
 import org.deeplearning4j.streaming.conversion.dataset.RecordToDataSet;
 import org.deeplearning4j.streaming.conversion.ndarray.RecordToNDArray;
 import org.deeplearning4j.streaming.routes.CamelKafkaRouteBuilder;
 import org.deeplearning4j.streaming.serde.RecordSerializer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Random;
+import java.util.UUID;
+
 
 /**
  * A base kafka pieline that handles
@@ -65,7 +69,7 @@ public abstract class BaseKafkaPipeline<E,RECORD_CONVERTER_FUNCTION> {
                         exchange.getIn().setHeader(KafkaConstants.KEY, UUID.randomUUID().toString());
                         exchange.getIn().setHeader(KafkaConstants.PARTITION_KEY, new Random().nextInt(kafkaPartitions));
                         byte[] bytes = new RecordSerializer().serialize(kafkaTopic, record);
-                        String base64 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+                        String base64 = Base64.encodeBase64String(bytes);
                         exchange.getIn().setBody(base64, String.class);
                     }
                 }).build());

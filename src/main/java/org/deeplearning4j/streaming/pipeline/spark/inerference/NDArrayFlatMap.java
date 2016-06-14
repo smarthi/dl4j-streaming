@@ -1,5 +1,6 @@
 package org.deeplearning4j.streaming.pipeline.spark.inerference;
 
+import org.apache.commons.net.util.Base64;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.canova.api.writable.Writable;
 import org.deeplearning4j.streaming.conversion.ndarray.RecordToNDArray;
@@ -25,7 +26,7 @@ public class NDArrayFlatMap implements FlatMapFunction<Tuple2<String, String>, I
     @Override
     public Iterable<INDArray> call(Tuple2<String, String> stringStringTuple2) throws Exception {
         try {
-            byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(stringStringTuple2._2());
+            byte[] bytes = Base64.decodeBase64(stringStringTuple2._2());
             Collection<Collection<Writable>> records = new RecordDeSerializer().deserialize("topic", bytes);
             INDArray d = recordToDataSetFunction.convert(records);
             return Arrays.asList(d);
