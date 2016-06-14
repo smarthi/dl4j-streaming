@@ -149,10 +149,11 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
 
         ModelSerializer.writeModel(network, outputPath, false);
         final boolean computationGraph = false;
+        final String uri = String.format("file://%s?fileName=tmp.txt", dir.getAbsolutePath());
         context.addRoutes(DL4jServeRouteBuilder.builder()
                 .computationGraph(computationGraph).zooKeeperPort(zookeeper.getPort())
                 .kafkaBroker(kafkaCluster.getBrokerList()).consumingTopic(topicName)
-                .modelUri(outputPath).outputUri(String.format("file:/%s?fileName=tmp.txt", dir.getAbsolutePath())).finalProcessor(new Processor() {
+                .modelUri(outputPath).outputUri(uri).finalProcessor(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         exchange.getIn().setBody(exchange.getIn().getBody().toString());
@@ -165,7 +166,6 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
         ConsumerTemplate consumerTemplate = context.createConsumerTemplate();
         ProducerTemplate producerTemplate = context.createProducerTemplate();
         producerTemplate.sendBody("direct:start","hello");
-       Thread.sleep(30000);
         consumerTemplate.receiveBody(endpoint,3000,String.class);
         String contents = FileUtils.readFileToString(new File(dir,"tmp.txt"));
         assertNotEquals("",contents);

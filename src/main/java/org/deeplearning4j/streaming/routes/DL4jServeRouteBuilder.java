@@ -14,6 +14,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 
 /**
  * Serve results from a kafka queue.
@@ -59,12 +60,10 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         byte[] o = (byte[]) exchange.getIn().getBody();
-                        byte[] arr  = Base64.decodeBase64(o);
+                        byte[] arr  = Base64.decodeBase64(new String(o));
                         ByteArrayInputStream bis = new ByteArrayInputStream(arr);
-                        System.out.println("BEFORE READ ARRAY");
-                        INDArray predict = Nd4j.read(bis);
-                        System.out.println("NEURAL NETS");
-                        System.out.println("READ ARRAY");
+                        DataInputStream dis = new DataInputStream(bis);
+                        INDArray predict = Nd4j.read(dis);
                         if(computationGraph) {
                             ComputationGraph graph = ModelSerializer.restoreComputationGraph(modelUri);
                             INDArray[] output = graph.output(predict);
@@ -81,7 +80,8 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
 
 
                     }
-                }).process(finalProcessor)
+                })
+                .process(finalProcessor)
                 .to(outputUri);
     }
 }
