@@ -29,11 +29,8 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
 
 /**
  * Created by agibsonccc on 6/12/16.
@@ -46,7 +43,6 @@ public class Dl4jServingRouteTest extends CamelTestSupport {
     private File dir = new File("tmpdir");
     private DataSet next;
     private static String topicName = "predict";
-    private String key = UUID.randomUUID().toString();
 
     @BeforeClass
     public static void init() throws Exception {
