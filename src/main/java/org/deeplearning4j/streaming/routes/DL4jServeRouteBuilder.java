@@ -24,15 +24,15 @@ import java.io.DataInputStream;
 @AllArgsConstructor
 @Builder
 public class DL4jServeRouteBuilder extends RouteBuilder {
-    private String modelUri;
-    private String kafkaBroker;
-    private String consumingTopic;
-    private boolean computationGraph;
-    private String outputUri;
-    private Processor finalProcessor;
-    private String groupId = "dl4j-serving";
-    private String zooKeeperHost = "localhost";
-    private int zooKeeperPort = 2181;
+    protected String modelUri;
+    protected String kafkaBroker;
+    protected String consumingTopic;
+    protected boolean computationGraph;
+    protected String outputUri;
+    protected Processor finalProcessor;
+    protected String groupId = "dl4j-serving";
+    protected String zooKeeperHost = "localhost";
+    protected int zooKeeperPort = 2181;
     /**
      * <b>Called on initialization to build the routes using the fluent builder syntax.</b>
      * <p/>
