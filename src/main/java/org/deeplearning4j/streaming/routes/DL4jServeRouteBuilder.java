@@ -18,7 +18,9 @@ import java.io.DataInputStream;
 
 /**
  * Serve results from a kafka queue.
- *
+ * The input to the route can either be a pre serialized ndarray
+ * or a normal ndarray itself.
+ * 
  * @author Adam Gibson
  */
 @AllArgsConstructor
@@ -71,11 +73,17 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        byte[] o = (byte[]) exchange.getIn().getBody();
-                        byte[] arr  = Base64.decodeBase64(new String(o));
-                        ByteArrayInputStream bis = new ByteArrayInputStream(arr);
-                        DataInputStream dis = new DataInputStream(bis);
-                        INDArray predict = Nd4j.read(dis);
+                        INDArray predict;
+                        if(exchange.getIn().getBody() instanceof byte[]) {
+                            byte[] o = (byte[]) exchange.getIn().getBody();
+                            byte[] arr  = Base64.decodeBase64(new String(o));
+                            ByteArrayInputStream bis = new ByteArrayInputStream(arr);
+                            DataInputStream dis = new DataInputStream(bis);
+                            predict = Nd4j.read(dis);
+                        }
+                        else
+                            predict = (INDArray) exchange.getIn().getBody();
+
                         if(computationGraph) {
                             ComputationGraph graph = ModelSerializer.restoreComputationGraph(modelUri);
                             INDArray[] output = graph.output(predict);
