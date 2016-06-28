@@ -117,6 +117,12 @@
             <version>${nd4j.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>canova-nd4j-image</artifactId>
+            <version>${canova.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_${scala.binary.version}</artifactId>
         </dependency>

@@ -34,12 +34,7 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
     protected String zooKeeperHost = "localhost";
     protected int zooKeeperPort = 2181;
     //default no-op
-    protected Processor beforeProcessor = new Processor() {
-        @Override
-        public void process(Exchange exchange) throws Exception {
-
-        }
-    };
+    protected Processor beforeProcessor;
 
 
     /**
@@ -64,6 +59,14 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
                 ,zooKeeperPort,
                 StringEncoder.class.getName(),
                 StringEncoder.class.getName());
+        if(beforeProcessor == null) {
+            beforeProcessor = new Processor() {
+                @Override
+                public void process(Exchange exchange) throws Exception {
+
+                }
+            };
+        }
         from(kafkaUri).process(beforeProcessor)
                 .process(new Processor() {
                     @Override
