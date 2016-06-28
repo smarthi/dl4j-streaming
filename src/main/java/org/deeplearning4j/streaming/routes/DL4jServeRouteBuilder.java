@@ -33,6 +33,15 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
     protected String groupId = "dl4j-serving";
     protected String zooKeeperHost = "localhost";
     protected int zooKeeperPort = 2181;
+    //default no-op
+    protected Processor beforeProcessor = new Processor() {
+        @Override
+        public void process(Exchange exchange) throws Exception {
+
+        }
+    };
+
+
     /**
      * <b>Called on initialization to build the routes using the fluent builder syntax.</b>
      * <p/>
@@ -55,7 +64,7 @@ public class DL4jServeRouteBuilder extends RouteBuilder {
                 ,zooKeeperPort,
                 StringEncoder.class.getName(),
                 StringEncoder.class.getName());
-        from(kafkaUri)
+        from(kafkaUri).process(beforeProcessor)
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
